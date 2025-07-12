@@ -3,6 +3,7 @@ import re
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
+import json
 
 load_dotenv()
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
@@ -35,19 +36,29 @@ def get_video_comments(video_url, max_comments = 50):
             break
     return comments
 
-def analyze_sentiments(comments):
-    model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+def analyze_sentiments(comments: list[str]) -> dict:
+    
     prompt = (
-        "You're an AI that analyzes YouTube comments.\n"
-        "Given a list of comments, classify each as Positive, Negative, or Neutral.\n"
-        "Return your response like this:\n\n"
-        "- Positive:\n  - comment1\n  - comment2\n"
-        "- Neutral:\n  - comment3\n"
-        "- Negative:\n  - comment4\n\n"
-        "Here are the comments:\n"
+        """You are a YouTube comment sentiment analyzer.
+        Analyze the following comments and return two things:
+        1. The count of Positive, Neutral, and Negative comments.
+        2. A short summary (2-3 sentences) of what viewers are saying.
+        The comments may be in multiple languages. Please analyze them accordingly.
+        Return your output strictly in this JSON format:
+        {
+            "positive": <number>,
+            "neutral": <number>,
+            "negative": <number>,
+            "summary": "<short overall summary>"
+        }
+        Here are the comments:"""
     )
     full_prompt = prompt + "\n".join(f"- {comment}" for comment in comments[:30])
-
-    response = model.generate_content(contents=[{"role": 'user', "parts": [full_prompt]}])
-    print(response.text)
-    return response.text
+    try:
+        model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+        response = model.generate_content(contents=[{"role": 'user', "parts": [full_prompt]}])
+        text = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
+        return json.loads(text)
+    except Exception as e:
+        print(f"Error during sentiment analysis: {e}")
+        return None
