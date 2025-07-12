@@ -14,3 +14,5 @@ venv/
 
 # Google OAuth token (if used later)
 token.json
+
+firebase_key.json
