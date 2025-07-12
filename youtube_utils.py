@@ -40,20 +40,25 @@ def analyze_sentiments(comments: list[str]) -> dict:
     
     prompt = (
         """You are a YouTube comment sentiment analyzer.
-        Analyze the following comments and return two things:
-        1. The count of Positive, Neutral, and Negative comments.
-        2. A short summary (2-3 sentences) of what viewers are saying.
+        Given a list of viewer comments, classify each as:
+        - Positive
+        - Negative
+        - Neutral
+        Then:
+        1. Count how many comments fall into each category.
+        2. Give a 5-6 line summary that reflects the general audience sentiment.
+        3. Ignore irrelevant or spammy comments (like emojis or "first", "nice").
         The comments may be in multiple languages. Please analyze them accordingly.
-        Return your output strictly in this JSON format:
+        Return the result as a JSON in this format:
         {
-            "positive": <number>,
-            "neutral": <number>,
-            "negative": <number>,
+            "positive": [number],
+            "neutral": [number],
+            "negative": [number],
             "summary": "<short overall summary>"
         }
         Here are the comments:"""
     )
-    full_prompt = prompt + "\n".join(f"- {comment}" for comment in comments[:30])
+    full_prompt = prompt + "\n".join(f"- {comment}" for comment in comments[:50])
     try:
         model = genai.GenerativeModel(model_name="gemini-2.0-flash")
         response = model.generate_content(contents=[{"role": 'user', "parts": [full_prompt]}])

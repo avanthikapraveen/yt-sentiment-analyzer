@@ -1,6 +1,7 @@
 import streamlit as st
 from youtube_utils import get_video_comments, analyze_sentiments
 import pandas as pd
+import plotly.express as px
 
 st.set_page_config(page_title = "YouTube Sentiment Analyzer", layout = "centered", initial_sidebar_state = "collapsed")
 st.title("YouTube Comment Sentiment Analyzer")
@@ -37,5 +38,13 @@ if st.button("Analyze Comments"):
                 }
 
                 df = pd.DataFrame(data)
-                st.bar_chart(df.set_index("Sentiment"))
+                fig = px.pie( 
+                    df,
+                    names = "Sentiment",
+                    values = "Count",
+                    color_discrete_sequence = px.colors.qualitative.Set3
+                )
+                st.plotly_chart(fig)
+
+                
 
