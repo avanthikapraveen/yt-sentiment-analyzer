@@ -1,0 +1,7 @@
+streamlit
+google-api-python-client
+google-generativeai
+firebase-admin
+python-dotenv
+pandas
+plotly
