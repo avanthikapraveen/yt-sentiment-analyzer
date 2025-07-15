@@ -63,6 +63,7 @@ def analyze_sentiments(comments: list[str]) -> dict:
         model = genai.GenerativeModel(model_name="gemini-2.0-flash")
         response = model.generate_content(contents=[{"role": 'user', "parts": [full_prompt]}])
         text = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
+        text = re.sub(r'\\(?![\\/"bfnrtu])', r'\\\\', text)
         return json.loads(text)
     except Exception as e:
         print(f"Error during sentiment analysis: {e}")
